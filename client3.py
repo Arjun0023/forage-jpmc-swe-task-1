@@ -17,7 +17,6 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #  DEALINGS IN THE SOFTWARE.
-
 import json
 import random
 import urllib.request
@@ -31,18 +30,19 @@ N = 500
 
 def getDataPoint(quote):
     """ Produce all the needed values to generate a datapoint """
-    """ ------------- Update this function ------------- """
     stock = quote['stock']
     bid_price = float(quote['top_bid']['price'])
     ask_price = float(quote['top_ask']['price'])
-    price = bid_price
+    price = (bid_price + ask_price) / 2  # Calculate the price as the average of the bid and ask prices
     return stock, bid_price, ask_price, price
+
 
 
 def getRatio(price_a, price_b):
     """ Get ratio of price_a and price_b """
-    """ ------------- Update this function ------------- """
-    return 1
+    if price_b == 0:
+        return 0  # Return 0 when price_b is zero to avoid division by zero error
+    return price_a / price_b  # Calculate the ratio of the two prices
 
 
 # Main
@@ -51,9 +51,14 @@ if __name__ == "__main__":
     for _ in iter(range(N)):
         quotes = json.loads(urllib.request.urlopen(QUERY.format(random.random())).read())
 
-        """ ----------- Update to get the ratio --------------- """
+        # Calculate the stock prices and store them in a dictionary
+        prices = {}
         for quote in quotes:
             stock, bid_price, ask_price, price = getDataPoint(quote)
             print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock, bid_price, ask_price, price))
+            prices[stock] = price
 
-        print("Ratio %s" % getRatio(price, price))
+        # Calculate the ratio for the two specified stocks and print the result
+        if 'ABC' in prices and 'DEF' in prices:
+            ratio = getRatio(prices['ABC'], prices['DEF'])
+            print("Ratio %s" % ratio)
